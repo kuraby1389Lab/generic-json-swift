@@ -44,6 +44,11 @@ extension JSON {
         let encoded = try JSONEncoder().encode(encodable)
         self = try JSONDecoder().decode(JSON.self, from: encoded)
     }
+    
+    public init(from string:String, using decoder:JSONDecoder? = nil) throws {
+        guard let data = string.data(using: .utf8) else { throw JSONError.decodingFailed }
+        self = try (decoder ?? JSONDecoder()).decode(JSON.self, from: data)
+    }
 }
 
 extension JSON: ExpressibleByBooleanLiteral {
