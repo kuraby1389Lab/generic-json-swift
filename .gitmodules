@@ -1,0 +1,3 @@
+[submodule "GenericJSONTests/json-patch-tests"]
+	path = GenericJSONTests/json-patch-tests
+	url = https://github.com/json-patch/json-patch-tests.git
