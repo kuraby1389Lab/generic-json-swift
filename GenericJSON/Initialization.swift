@@ -75,7 +75,7 @@ extension JSON: ExpressibleByArrayLiteral {
 extension JSON: ExpressibleByDictionaryLiteral {
 
     public init(dictionaryLiteral elements: (String, JSON)...) {
-        var object: [String:JSON] = [:]
+        var object = Object()
         for (k, v) in elements {
             object[k] = v
         }

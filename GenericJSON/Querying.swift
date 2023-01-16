@@ -27,7 +27,7 @@ public extension JSON {
     }
 
     /// Return the object value if this is an `.object`, otherwise `nil`
-    var objectValue: [String: JSON]? {
+    var objectValue: Object? {
         if case .object(let value) = self {
             return value
         }
@@ -35,7 +35,7 @@ public extension JSON {
     }
 
     /// Return the array value if this is an `.array`, otherwise `nil`
-    var arrayValue: [JSON]? {
+    var arrayValue: Array? {
         if case .array(let value) = self {
             return value
         }

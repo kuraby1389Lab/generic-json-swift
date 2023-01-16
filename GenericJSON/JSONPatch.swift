@@ -15,28 +15,28 @@ extension JSONPatch {
         return tokenIndex
     }
     
-    public static func remove(at path: Pointer, in dictionary: [String:JSON]) throws -> [String:JSON] {
+    public static func remove(at path: Pointer, in object: JSON.Object) throws -> JSON.Object {
         let token = path[0]
-        var dictionary = dictionary
+        var object = object
         if path.count == 1 {
-            if dictionary[token] != nil {
-                dictionary[token] = nil
+            if object[token] != nil {
+                object[token] = nil
             } else {
                 throw JSONPatchError.unreachablePath
             }
 
         } else {
             let childPath = Pointer(path.dropFirst())
-            if let child = dictionary[token] {
-                dictionary[token] = try remove(at: childPath, in: child)
+            if let child = object[token] {
+                object[token] = try remove(at: childPath, in: child)
             } else {
                 throw JSONPatchError.unreachablePath
             }
         }
-        return dictionary
+        return object
     }
 
-    public static func remove(at path: Pointer, in array: [JSON]) throws -> [JSON] {
+    public static func remove(at path: Pointer, in array: JSON.Array) throws -> JSON.Array {
         let token = path[0]
         var array = array
         if path.count == 1 {
@@ -77,28 +77,28 @@ extension JSONPatch {
         }
     }
     
-    public static func add(value: JSON, at path: Pointer, in dictionary: [String:JSON]) throws -> [String:JSON] {
+    public static func add(value: JSON, at path: Pointer, in object: JSON.Object) throws -> JSON.Object {
         let token = path[0]
-        var dictionary = dictionary
+        var object = object
         if path.count == 1 {
-            if dictionary[token] == nil || dictionary[token] == .null {
-                dictionary[token] = value
+            if object[token] == nil || object[token] == .null {
+                object[token] = value
             } else {
                 throw JSONPatchError.existingValue
             }
             
         } else {
             let childPath = Pointer(path.dropFirst())
-            if let child = dictionary[token] {
-                dictionary[token] = try add(value: value, at: childPath, in: child)
+            if let child = object[token] {
+                object[token] = try add(value: value, at: childPath, in: child)
             } else {
                 throw JSONPatchError.unreachablePath
             }
         }
-        return dictionary
+        return object
     }
     
-    public static func add(value: JSON, at path: Pointer, in array: [JSON]) throws -> [JSON] {
+    public static func add(value: JSON, at path: Pointer, in array: JSON.Array) throws -> JSON.Array {
         let token = path[0]
         var array = array
         if path.count == 1 {
@@ -140,10 +140,10 @@ extension JSONPatch {
         }
     }
     
-    public static func value(at path: Pointer, in dictionary: [String:JSON]) throws -> JSON {
+    public static func value(at path: Pointer, in object: JSON.Object) throws -> JSON {
         let token = path[0]
         if path.count == 1 {
-            if let value = dictionary[token] {
+            if let value = object[token] {
                 return value
             } else {
                 throw JSONPatchError.unreachablePath
@@ -151,7 +151,7 @@ extension JSONPatch {
             
         } else {
             let childPath = Pointer(path.dropFirst())
-            if let child = dictionary[token] {
+            if let child = object[token] {
                 return try value(at: childPath, in: child)
             } else {
                 throw JSONPatchError.unreachablePath
@@ -159,7 +159,7 @@ extension JSONPatch {
         }
     }
     
-    public static func value(at path: Pointer, in array: [JSON]) throws -> JSON {
+    public static func value(at path: Pointer, in array: JSON.Array) throws -> JSON {
         let token = path[0]
         if path.count == 1 {
             if let tokenIndex = getTokenIndex(for: token), tokenIndex >= 0, tokenIndex < array.count {
@@ -275,13 +275,13 @@ extension JSONPatch {
         
     }
     
-    public static func execute(_ operations:[Operation], with json: JSON) -> Result<JSON, JSONPatchError> {
+    public func execute(with json: JSON) -> Result<JSON, JSONPatchError> {
         var result:Result<JSON, JSONPatchError> = .success(json)
         
-        for operation in operations {
+        for operation in self {
             switch result {
             case .success(let json):
-                result = execute(operation, with: json)
+                result = JSONPatch.execute(operation, with: json)
             case .failure(let error):
                 return .failure(error)
             }

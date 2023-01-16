@@ -7,43 +7,46 @@
 
 import Foundation
 
-public enum JSONPatch {
-
-    public struct Operation: Equatable, Codable {
-        
-        public enum Code: String, Codable {
-            case add
-            case remove
-            case replace
-            case copy
-            case move
-            case test
-            case unknown
-        }
-
-        public enum CodingKeys: String, CodingKey {
-            case code = "op"
-            case path
-            case value
-            case from
-        }
-        
-        public init(_ code: Code, path: String? = nil, from: String? = nil, value: JSON? = nil) {
-            self.code = code
-            self.path = path
-            self.from = from
-            self.value = value
-        }
-        
-        public var code: Code
-        public var path: String?
-        public var from: String?
-        public var value: JSON?
-        
+public struct JSONPatchOperation: Equatable, Codable {
+    
+    public enum Code: String, Codable {
+        case add
+        case remove
+        case replace
+        case copy
+        case move
+        case test
+        case unknown
     }
+
+    public enum CodingKeys: String, CodingKey {
+        case code = "op"
+        case path
+        case value
+        case from
+    }
+    
+    public init(_ code: Code, path: String? = nil, from: String? = nil, value: JSON? = nil) {
+        self.code = code
+        self.path = path
+        self.from = from
+        self.value = value
+    }
+    
+    public var code: Code
+    public var path: String?
+    public var from: String?
+    public var value: JSON?
+    
 }
 
-extension JSONPatch.Operation {
+public typealias JSONPatch = [JSONPatchOperation]
+
+extension JSONPatch {
+    public typealias Operation = Element
+}
+
+extension JSONPatchOperation {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let code = try container.decode(JSONPatch.Operation.Code.self, forKey: .code)
@@ -62,13 +65,13 @@ extension JSONPatch.Operation {
 }
 
 
-extension JSONPatch.Operation.Code {
+extension JSONPatchOperation.Code {
     public init(from decoder: Decoder) throws {
         self = try JSONPatch.Operation.Code(rawValue: decoder.singleValueContainer().decode(RawValue.self)) ?? .unknown
     }
 }
 
-extension JSONPatch.Operation {
+extension JSONPatchOperation {
     /// Create an Operation value from an `Encodable`
 //    public init<T: Encodable>(encodable: T) throws {
 //        let encoded = try JSONEncoder().encode(encodable)
@@ -77,7 +80,7 @@ extension JSONPatch.Operation {
     
 }
 
-extension JSONPatch.Operation {
+extension JSONPatchOperation {
     
     public var pathPointer: JSONPatch.Pointer? {
         get throws {

@@ -19,7 +19,7 @@ extension JSON {
             return new
         }
 
-        var merged: [String: JSON] = [:]
+        var merged = Object()
 
         // Add keys from old not present in new (“no change” case).
         for (key, val) in lhs where rhs[key] == nil {

@@ -5,10 +5,14 @@ import Foundation
 /// and `Codable`, so that you can compare values for equality and code and decode them into data
 /// or strings.
 @dynamicMemberLookup public enum JSON: Equatable {
+    
+    public typealias Object = [String: JSON]
+    public typealias Array = [JSON]
+    
     case string(String)
     case number(Double)
-    case object([String:JSON])
-    case array([JSON])
+    case object(Object)
+    case array(Array)
     case bool(Bool)
     case null
 }
@@ -39,9 +43,9 @@ extension JSON: Codable {
 
         let container = try decoder.singleValueContainer()
 
-        if let object = try? container.decode([String: JSON].self) {
+        if let object = try? container.decode(Object.self) {
             self = .object(object)
-        } else if let array = try? container.decode([JSON].self) {
+        } else if let array = try? container.decode(Array.self) {
             self = .array(array)
         } else if let string = try? container.decode(String.self) {
             self = .string(string)
