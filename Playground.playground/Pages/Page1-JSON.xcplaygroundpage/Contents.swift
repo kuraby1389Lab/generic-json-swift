@@ -1,4 +1,4 @@
-import Cocoa
+import Foundation
 import GenericJSON
 
 let json: JSON = [
@@ -7,4 +7,6 @@ let json: JSON = [
     "empty": nil,
 ]
 
-let str = try String(data: try JSONEncoder().encode(json), encoding: .utf8)!
+let str = encodeToString(json)
+
+//: [Next](@next)
