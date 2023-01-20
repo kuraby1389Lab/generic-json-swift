@@ -67,14 +67,14 @@ public extension JSONPatch {
             }
         }
         
-        for targetKey in targetKeys {
+        for targetKey in targetKeys.sorted() {
             if let targetValue = target[targetKey] {
                 // print("adding", targetKey)
                 patch.append(.add(path: path.appending(targetKey), value: targetValue))
             }
         }
         
-        for sourceKey in sourceKeys {
+        for sourceKey in sourceKeys.sorted() {
             patch.append(.remove(path: path.appending(sourceKey)))
         }
         
