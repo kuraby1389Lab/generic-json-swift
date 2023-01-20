@@ -58,4 +58,6 @@ testDiff("different types", source: sourceArray, target: targetObject)
 
 testDiff("different types (primitive)", source: .bool(true), target: .string("hello"))
 
+testDiff("change type (empty)", source: [:], target: [])
+
 //: [Next](@next)

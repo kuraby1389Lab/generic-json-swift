@@ -18,7 +18,7 @@ struct JSONPatchDiffTestRecord: CodableRecord {
 
 typealias JSONPatchDiffTestRecords = [JSONPatchDiffTestRecord]
 
-class PatchDiffTests: XCTestCase, RecordTestCaseProtocol, ObjcTestCaseProtocol {
+class PatchDiffTests: RecordTestCase<JSONPatchDiffTestRecord> {
     typealias Record = JSONPatchDiffTestRecord
     
     override class var defaultTestSuite: XCTestSuite {
@@ -28,11 +28,7 @@ class PatchDiffTests: XCTestCase, RecordTestCaseProtocol, ObjcTestCaseProtocol {
                                                                            tester: self)
     }
     
-    var index:Int?
-    var filename:String?
-    var record:Record?
-    
-    @objc func performTest() {
+    @objc override func performRecordTest() {
         
         guard let index = index else {
             XCTFail("Index not found for test")
@@ -43,7 +39,7 @@ class PatchDiffTests: XCTestCase, RecordTestCaseProtocol, ObjcTestCaseProtocol {
             XCTFail("[\(index)] Record not found for test")
             return
         }
-
+        
         let result = JSONPatch(from: record.source, to: record.target)
         let comment = record.comment ?? "no comment"
 
@@ -58,6 +54,7 @@ class PatchDiffTests: XCTestCase, RecordTestCaseProtocol, ObjcTestCaseProtocol {
         case .failure(let error):
             XCTFail("[\(index)] \(comment): \(error)")
         }
+
     }
 
 }

@@ -1,11 +1,20 @@
 [
   {
-    "comment": "empty source, empty target",
-    "source": {},
-    "target": []
+    "comment": "empty source, empty target of same type",
+    "source": [],
+    "target": [],
+    "patch": []
   },
   {
-    "comment": "empty source, empty target",
+    "comment": "empty source, empty target of different type",
+    "source": {},
+    "target": [],
+    "patch": [
+      { "op": "replace", "path": "", "value": [] }
+    ]
+  },
+  {
+    "comment": "differently ordered json dictionary",
     "source": { "foo": 1, "bar": 2 },
     "target": { "bar": 2, "foo": 1 },
     "patch": []
@@ -48,8 +57,8 @@
     "source": { "alpha": "one" },
     "target": { "bar": { "foo": 1 }, "alpha": "one", "bing": "bong" },
     "patch": [
-      { "op": "add", "path": "/bing", "value": "bong" },
-      { "op": "add", "path": "/bar", "value": { "foo": 1 } }
+      { "op": "add", "path": "/bar", "value": { "foo": 1 } },
+      { "op": "add", "path": "/bing", "value": "bong" }
     ]
   },
   {

@@ -22,14 +22,10 @@ struct OfficialPatchTestRecord: CodableRecord {
 
 typealias JSONPatchTestRecords = [OfficialPatchTestRecord]
 
-class PatchOfficialTests: XCTestCase, RecordTestCaseProtocol, ObjcTestCaseProtocol {
+class PatchOfficialTests: RecordTestCase<OfficialPatchTestRecord> {
     typealias Record = OfficialPatchTestRecord
     
-    var index:Int?
-    var filename:String?
-    var record:Record?
-
-    @objc func performTest() {
+    @objc override func performRecordTest() {
         
         let record = record!
         let index = index!

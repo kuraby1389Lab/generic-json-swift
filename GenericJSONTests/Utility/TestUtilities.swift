@@ -21,7 +21,7 @@ protocol RecordTestCaseProtocol {
 }
 
 @objc protocol ObjcTestCaseProtocol {
-    func performTest()
+    func performRecordTest()
 }
 
 func projectDirectoryURL(for name: String, path: String = #file) -> URL {
@@ -38,9 +38,9 @@ func loadCodableRecords<Record: CodableRecord>(from filename: String, in directo
     return try JSONDecoder().decode([Record].self, from: data)
 }
 
-class RecordTestCase<Record: CodableRecord>: XCTestCase {
+class RecordTestCase<Record: CodableRecord>: XCTestCase, RecordTestCaseProtocol, ObjcTestCaseProtocol {
     
-    class func buildTestSuite<TestCase>(for filename:String, in directory: String, suite testSuiteClass: AnyClass, tester: TestCase.Type) -> XCTestSuite where TestCase: RecordTestCaseProtocol, TestCase: ObjcTestCaseProtocol, TestCase: XCTestCase, TestCase.Record == Record {
+    static func buildTestSuite<TestCase>(for filename:String, in directory: String, suite testSuiteClass: AnyClass, tester: TestCase.Type) -> XCTestSuite where TestCase: RecordTestCaseProtocol, TestCase: ObjcTestCaseProtocol, TestCase: XCTestCase, TestCase.Record == Record {
         let suite = XCTestSuite(forTestCaseClass: testSuiteClass)
         
         do {
@@ -49,7 +49,7 @@ class RecordTestCase<Record: CodableRecord>: XCTestCase {
             for (index,record) in records.enumerated() {
                 // skip disabled records
                 if record.disabled == true { continue }
-                var test = TestCase(selector: #selector(TestCase.performTest))
+                var test = TestCase(selector: #selector(TestCase.performRecordTest))
                 test.record = record
                 test.index = index
                 test.filename = filename
@@ -72,6 +72,14 @@ class RecordTestCase<Record: CodableRecord>: XCTestCase {
         }
         
         return suite
+    }
+    
+    var index: Int?
+    var record: Record?
+    var filename: String?
+    
+    func performRecordTest() {
+        // meant for override
     }
     
     var message:String!
