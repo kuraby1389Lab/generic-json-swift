@@ -1,0 +1,93 @@
+[
+  {
+    "comment": "empty source, empty target",
+    "source": {},
+    "target": []
+  },
+  {
+    "comment": "empty source, empty target",
+    "source": { "foo": 1, "bar": 2 },
+    "target": { "bar": 2, "foo": 1 },
+    "patch": []
+  },
+  {
+    "comment": "should nest object",
+    "source": { "foo": 1, "bar": 2 },
+    "target": [{ "bar": 2, "foo": 1 }],
+    "patch": [
+      { "op": "replace", "path": "", "value": [{ "bar": 2, "foo": 1 }] }
+    ]
+  },
+  {
+    "comment": "should add object to array",
+    "source": [],
+    "target": [{ "foo": 1 }],
+    "patch": [
+      { "op": "add", "path": "/-", "value": { "foo": 1 } }
+    ]
+  },
+  {
+    "comment": "should add objects to array",
+    "source": [],
+    "target": [{ "foo": 1 }, { "bar": 2 }],
+    "patch": [
+      { "op": "add", "path": "/-", "value": { "foo": 1 } },
+      { "op": "add", "path": "/-", "value": { "bar": 2 } }
+    ]
+  },
+  {
+    "comment": "should add value to object",
+    "source": { "alpha": "one" },
+    "target": { "bar": { "foo": 1 }, "alpha": "one" },
+    "patch": [
+      { "op": "add", "path": "/bar", "value": { "foo": 1 } }
+    ]
+  },
+  {
+    "comment": "should add values to object",
+    "source": { "alpha": "one" },
+    "target": { "bar": { "foo": 1 }, "alpha": "one", "bing": "bong" },
+    "patch": [
+      { "op": "add", "path": "/bing", "value": "bong" },
+      { "op": "add", "path": "/bar", "value": { "foo": 1 } }
+    ]
+  },
+  {
+    "comment": "should remove value from end of array",
+    "source": [ "foo", "bar" ],
+    "target": [ "foo" ],
+    "patch": [
+      { "op": "remove", "path": "/1" }
+    ]
+  },
+  {
+    "comment": "should remove values from end of array",
+    "source": [ "foo", "bar", "charlie", "foxtrot" ],
+    "target": [ "foo" ],
+    "patch": [
+      { "op": "remove", "path": "/3" },
+      { "op": "remove", "path": "/2" },
+      { "op": "remove", "path": "/1" }
+    ]
+  },
+  {
+    "comment": "should remove value from object",
+    "source": { "foo": 1, "bar": 2 },
+    "target": { "bar": 2 },
+    "patch": [
+      { "op": "remove", "path": "/foo" }
+    ]
+  },
+  {
+    "comment": "should rearrange value in array",
+    "source": [ "foo", "bar", "charlie", "foxtrot" ],
+    "target": [ "charlie", "foo", "bar", "foxtrot" ],
+    "patch": [
+      { "op": "copy", "path": "/0", "from": "/2" },
+      { "op": "remove", "path": "/1" },
+      { "op": "copy", "path": "/2", "from": "/1" },
+      { "op": "remove", "path": "/3" },
+      { "op": "replace", "path": "/1", "value": "foo" }
+    ]
+  },
+]

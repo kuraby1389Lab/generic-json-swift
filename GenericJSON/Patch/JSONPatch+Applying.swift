@@ -1,5 +1,5 @@
 //
-//  JSONPatch.swift
+//  JSONPatch+Applying.swift
 //  GenericJSON
 //
 //  Created by Trystan Pfluger on 11/1/2023.
@@ -15,14 +15,14 @@ extension JSONPatch {
         return tokenIndex
     }
     
-    public static func remove(at path: Pointer, in object: JSON.Object) throws -> JSON.Object {
+    static func remove(at path: Pointer, in object: JSON.Object) throws -> JSON.Object {
         let token = path[0]
         var object = object
         if path.count == 1 {
             if object[token] != nil {
                 object[token] = nil
             } else {
-                throw JSONPatchError.unreachablePath
+                throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
             }
 
         } else {
@@ -30,13 +30,13 @@ extension JSONPatch {
             if let child = object[token] {
                 object[token] = try remove(at: childPath, in: child)
             } else {
-                throw JSONPatchError.unreachablePath
+                throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
             }
         }
         return object
     }
 
-    public static func remove(at path: Pointer, in array: JSON.Array) throws -> JSON.Array {
+    static func remove(at path: Pointer, in array: JSON.Array) throws -> JSON.Array {
         let token = path[0]
         var array = array
         if path.count == 1 {
@@ -45,7 +45,7 @@ extension JSONPatch {
             } else if token == "-" {
                 array.removeLast()
             } else {
-                throw JSONPatchError.unreachablePath
+                throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
             }
 
         } else {
@@ -55,29 +55,29 @@ extension JSONPatch {
             } else if token == "-", let last = array.last {
                 array.append(try remove(at: childPath, in: last))
             } else {
-                throw JSONPatchError.unreachablePath
+                throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
             }
         }
         return array
     }
     
-    public static func remove(at path: Pointer, in json: JSON) throws -> JSON {
+    static func remove(at path: Pointer, in json: JSON) throws -> JSON {
         guard path.count > 0 else { return .null }
         
         switch json {
-        case .object(var dictionary):
-            dictionary = try remove(at: path, in: dictionary)
-            return .object(dictionary)
+        case .object(var object):
+            object = try remove(at: path, in: object)
+            return .object(object)
         case .array(var array):
             array = try remove(at: path, in: array)
             return .array(array)
             
         case .string, .number, .bool, .null:
-            throw JSONPatchError.unreachablePath
+            throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
         }
     }
     
-    public static func add(value: JSON, at path: Pointer, in object: JSON.Object) throws -> JSON.Object {
+    static func add(value: JSON, at path: Pointer, in object: JSON.Object) throws -> JSON.Object {
         let token = path[0]
         var object = object
         if path.count == 1 {
@@ -92,13 +92,13 @@ extension JSONPatch {
             if let child = object[token] {
                 object[token] = try add(value: value, at: childPath, in: child)
             } else {
-                throw JSONPatchError.unreachablePath
+                throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
             }
         }
         return object
     }
     
-    public static func add(value: JSON, at path: Pointer, in array: JSON.Array) throws -> JSON.Array {
+    static func add(value: JSON, at path: Pointer, in array: JSON.Array) throws -> JSON.Array {
         let token = path[0]
         var array = array
         if path.count == 1 {
@@ -107,7 +107,7 @@ extension JSONPatch {
             } else if token == "-" {
                 array.append(value)
             } else {
-                throw JSONPatchError.unreachablePath
+                throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
             }
             
         } else {
@@ -118,35 +118,35 @@ extension JSONPatch {
                 let document = try add(value: value, at: childPath, in: JSON.object([:]))
                 array.append(document)
             } else {
-                throw JSONPatchError.unreachablePath
+                throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
             }
         }
         return array
     }
     
-    public static func add(value: JSON, at path: Pointer, in json: JSON) throws -> JSON {
+    static func add(value: JSON, at path: Pointer, in json: JSON) throws -> JSON {
         guard path.count > 0 else { return value }
         
         switch json {
-        case .object(var dictionary):
-            dictionary = try add(value: value, at: path, in: dictionary)
-            return .object(dictionary)
+        case .object(var object):
+            object = try add(value: value, at: path, in: object)
+            return .object(object)
         case .array(var array):
             array = try add(value: value, at: path, in: array)
             return .array(array)
             
         case .string, .number, .bool, .null:
-            throw JSONPatchError.unreachablePath
+            throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
         }
     }
     
-    public static func value(at path: Pointer, in object: JSON.Object) throws -> JSON {
+    static func value(at path: Pointer, in object: JSON.Object) throws -> JSON {
         let token = path[0]
         if path.count == 1 {
             if let value = object[token] {
                 return value
             } else {
-                throw JSONPatchError.unreachablePath
+                throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
             }
             
         } else {
@@ -154,12 +154,12 @@ extension JSONPatch {
             if let child = object[token] {
                 return try value(at: childPath, in: child)
             } else {
-                throw JSONPatchError.unreachablePath
+                throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
             }
         }
     }
     
-    public static func value(at path: Pointer, in array: JSON.Array) throws -> JSON {
+    static func value(at path: Pointer, in array: JSON.Array) throws -> JSON {
         let token = path[0]
         if path.count == 1 {
             if let tokenIndex = getTokenIndex(for: token), tokenIndex >= 0, tokenIndex < array.count {
@@ -167,7 +167,7 @@ extension JSONPatch {
             } else if token == "-", let last = array.last {
                 return last
             } else {
-                throw JSONPatchError.unreachablePath
+                throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
             }
 
         } else {
@@ -177,22 +177,22 @@ extension JSONPatch {
             } else if token == "-", let last = array.last {
                 return try value(at: childPath, in: last)
             } else {
-                throw JSONPatchError.unreachablePath
+                throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
             }
         }
     }
     
-    public static func value(at path: Pointer, in json: JSON) throws -> JSON {
+    static func value(at path: Pointer, in json: JSON) throws -> JSON {
         guard path.count > 0 else { return json }
         
         switch json {
-        case .object(let dictionary):
-            return try value(at: path, in: dictionary)
+        case .object(let object):
+            return try value(at: path, in: object)
         case .array(let array):
             return try value(at: path, in: array)
             
         case .string, .number, .bool, .null:
-            throw JSONPatchError.unreachablePath
+            throw JSONPatchError.unreachablePath(JSONPatch.encodePointer(path))
         }
     }
 }
@@ -200,23 +200,24 @@ extension JSONPatch {
 
 extension JSONPatch {
     
-    public static func replace(value: JSON, at path: Pointer, in json: JSON) throws -> JSON {
+    static func replace(value: JSON, at path: Pointer, in json: JSON) throws -> JSON {
         let removed = try remove(at: path, in: json)
         return try add(value: value, at: path, in: removed)
     }
     
-    public static func copy(from:Pointer, to path: Pointer, in json: JSON) throws -> JSON {
+    static func copy(from:Pointer, to path: Pointer, in json: JSON) throws -> JSON {
         let value = try value(at: from, in: json)
-        return try add(value: value, at: path, in: json)
+        let result = try add(value: value, at: path, in: json)
+        return result
     }
     
-    public static func move(from:Pointer, to path: Pointer, in json: JSON) throws -> JSON {
+    static func move(from:Pointer, to path: Pointer, in json: JSON) throws -> JSON {
         let value = try value(at: from, in: json)
         let removed = try remove(at: from, in: json)
         return try add(value: value, at: path, in: removed)
     }
     
-    public static func test(value: JSON, at path: Pointer, in json: JSON) throws -> JSON {
+    static func test(value: JSON, at path: Pointer, in json: JSON) throws -> JSON {
         let existing = try self.value(at: path, in: json)
         if existing == value {
             return json
@@ -225,8 +226,10 @@ extension JSONPatch {
         }
     }
     
-    public static func execute(_ operation:JSONPatch.Operation, with json: JSON) -> Result<JSON, JSONPatchError> {
-        guard operation.isLegal else { return .failure(.illegalOperation) }
+    static func execute(_ operation:JSONPatch.Operation, with json: JSON) -> Result<JSON, JSONPatchError> {
+        guard operation.isLegal else {
+            return .failure(.illegalOperation)
+        }
         
         var result:JSON? = nil
         
@@ -275,7 +278,7 @@ extension JSONPatch {
         
     }
     
-    public func execute(with json: JSON) -> Result<JSON, JSONPatchError> {
+    public func apply(to json: JSON) -> Result<JSON, JSONPatchError> {
         var result:Result<JSON, JSONPatchError> = .success(json)
         
         for operation in self {

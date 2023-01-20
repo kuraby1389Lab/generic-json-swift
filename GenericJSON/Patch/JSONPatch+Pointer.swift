@@ -7,11 +7,15 @@
 
 import Foundation
 
+public typealias JSONPatchPointerToken = String
+public typealias JSONPatchPointer = [JSONPatchPointerToken]
+
 extension JSONPatch {
-    public typealias Token = String
-    public typealias Pointer = [Token]
+    public typealias Token = JSONPatchPointerToken
+    public typealias Pointer = JSONPatchPointer
     
     public static func decodePointer(from string:String) throws -> Pointer {
+        // If string is empty return a valid token pointing to the root of the JSON
         guard !string.isEmpty else { return [] }
         var tokens:[Token] = []
         var partialToken:String = ""
@@ -39,7 +43,6 @@ extension JSONPatch {
                 }
             } else if character == "/" {
                 // Move to the next token
-//                if partialToken.isEmpty { throw JSONPatchError.invalidPointerFormat(string.endIndex) }
                 tokens.append(partialToken)
                 partialToken = ""
             } else if character == "~" {
@@ -70,5 +73,21 @@ extension JSONPatch {
         } else {
             return ""
         }
+    }
+}
+
+extension Array {
+    func appending(_ element: Element) -> Array<Element> {
+        var result = self
+        result.append(element)
+        return result
+    }
+}
+
+extension Array where Element == JSONPatch.Token {
+    func appending(_ index: Int) -> Array<JSONPatch.Token> {
+        var result = self
+        result.append("\(index)")
+        return result
     }
 }
